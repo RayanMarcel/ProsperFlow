@@ -1,107 +1,111 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 {% block 'head' %}
 
-    <link href="{% static 'general/css/home.css' %}" rel="stylesheet">
-    <link href="{% static 'general/css/manage.css' %}" rel="stylesheet">
+<link href="{% static 'general/css/home.css' %}" rel="stylesheet">
+<link href="{% static 'general/css/manage.css' %}" rel="stylesheet">
 
 {% endblock %}
 
 {% block 'body' %}
-    <br>
-    <br>
-    <div class="container">
-        <div class="row">
-            <div class="col-md-5">
-                <p class="fonte-destaque">Suas contas</p>
-                <hr>
+<br>
+<br>
+<div class="container">
+    <div class="row">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        <div class="col-md-5">
+            <p class="fonte-destaque">Suas contas</p>
+            <hr>
 
-                <div class="contas">
+            <div class="contas">
+                {% for conta in contas %}
+                <div class="lista-contas-main">
+                    <span><img width="10%" src="{{conta.icone.url}}">{{ conta.apelido }} ({{ conta.banco_nome }})</span>
 
-                    
-                        <div class="lista-contas-main">
-                            <span><img width="10%" src="#">&nbsp&nbspNubank</span>
-
-                            <span class="total-conta positivo">R$ 1.800,00&nbsp&nbsp&nbsp <a href="#"><img src="{% static 'general/img/exit.png' %}"></a></span>
-                        </div>
-                        <br>
-                    
-                    
+                    <span class="total-conta positivo">R$ {{ conta.valor|intcomma }} <a href="{% url 'deletar_banco' conta.token %}"><img
+                                src="{% static 'general/img/exit.png' %}"></a></span>
                 </div>
-
-                <hr>
-                <span class="fonte-destaque">Total:</span>
-                <span class="positivo total-conta font-destaque">R$ 1.800,00</span>
+                {% endfor %}
             </div>
 
-            <div class="col-md-2"></div>
-
-            <div class="col-md-5">
-                <p class="fonte-destaque">Nova conta</p>
-                
-                <form action="" method="POST">
-                    <label>Apelido</label>
-                    <input type="text" name="apelido" class="form-control" placeholder="">
-                    <br>
-                    <label>Banco</label>
-                    <select name="banco" class="form-select">
-                        <option value="NU">Nubank</option>
-                    </select>
-                    <br>
-                    <label>Tipo</label>
-                    <select name="tipo" class="form-select">
-                        <option value="pf">Pessoa física</option>
-                        <option value="pj">Pessoa jurídica</option>
-                    </select>
-                    <br>
-                    <label>Valor</label>
-                    <input type="number" name="valor" class="form-control" placeholder="">
-                    <br>
-                    <input type="file" placeholder="Ícone" name="icone">
-                    <br>
-                    <br>
-                    <input style="width: 100%" type="submit" class="botao-principal">
-                </form>
-            </div>
+            <hr>
+            <span class="fonte-destaque">Total:</span>
+            <span class="positivo total-conta font-destaque">R$ {{ total_contas|intcomma }}</span>
         </div>
 
-        <hr>
+        <div class="col-md-2"></div>
 
-        <div class="row">
-            <div class="col-md-5">
-                <span class="fonte-destaque">Nova categoria</span>
+        <div class="col-md-5">
+            <p class="fonte-destaque">Nova conta</p>
 
-                <form action="" method="POST">
-                    <label>Categoria</label>
-                    <input type="text" name="categoria" class="form-control">
-                    <br>
-
-                    <input type="checkbox" name="essencial" value="essencial"><label class="positivo">&nbspEssencial</label>
-                    <br>
-                    <br>
-                    <input style="width: 100%" type="submit" class="botao-principal" value="Adicionar">
-                </form>
-            </div>
-
-            <div class="col-md-2">
-            </div>
-
-            <div class="col-md-5">
-                <span class="fonte-destaque">Suas categoria</span>
+            <form action="{% url 'cadastrar_banco' %}" method="POST" enctype="multipart/form-data"> {% csrf_token %}
+                <label>Apelido</label>
+                <input type="text" name="apelido" class="form-control" placeholder="">
                 <br>
-                <div class="contas">
+                <label>Banco</label>
+                <select name="banco" class="form-select">
+                    <option value="NU">Nubank</option>
+                </select>
+                <br>
+                <label>Tipo</label>
+                <select name="tipo" class="form-select">
+                    <option value="pf">Pessoa física</option>
+                    <option value="pj">Pessoa jurídica</option>
+                </select>
+                <br>
+                <label>Valor</label>
+                <input type="number" step="0.01" name="valor" class="form-control" placeholder="">
+                <br>
+                <input type="file" placeholder="Ícone" name="icone" required>
+                <br>
+                <br>
+                <input style="width: 100%" type="submit" class="botao-principal" value="Enviar">
+            </form>
+        </div>
+    </div>
 
-                    
-                        <div class="lista-contas-main">
-                            <span>Lazer</span>
+    <hr>
 
-                            <span class="total-conta"><a href="#"><img src="#"></a></span>
-                        </div>
-                        <br>
-                   
-                    
+    <div class="row">
+        <div class="col-md-5">
+            <span class="fonte-destaque">Nova categoria</span>
+
+            <form action="" method="POST">
+                <label>Categoria</label>
+                <input type="text" name="categoria" class="form-control">
+                <br>
+
+                <input type="checkbox" name="essencial" value="essencial"><label class="positivo">&nbspEssencial</label>
+                <br>
+                <br>
+                <input style="width: 100%" type="submit" class="botao-principal" value="Adicionar">
+            </form>
+        </div>
+
+        <div class="col-md-2">
+        </div>
+
+        <div class="col-md-5">
+            <span class="fonte-destaque">Suas categoria</span>
+            <br>
+            <div class="contas">
+
+
+                <div class="lista-contas-main">
+                    <span>Lazer</span>
+
+                    <span class="total-conta"><a href="#"><img src="#"></a></span>
                 </div>
+                <br>
+
+
             </div>
         </div>
     </div>
+</div>
 {% endblock %}

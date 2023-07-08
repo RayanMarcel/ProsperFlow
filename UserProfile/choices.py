@@ -3,7 +3,7 @@ class ChoicesTipoConta():
     ('PF', 'Pessoa Física'),
     ('PJ', 'Pessoa Jurídica')
     ]
-    
+
 class ChoicesBancos():
     bancos = [
     ('1', 'BANCO DO BRASIL S.A (BB)'),
@@ -222,3 +222,8 @@ class ChoicesBancos():
     ('336', 'BANCO C6 S.A – C6 BANK'),
     ('654', 'BANCO DIGIMAIS S.A'),
     ]
+
+    @classmethod
+    def get_banco_nome(cls, codigo):
+        bancos_dict = dict(cls.bancos)
+        return bancos_dict.get(codigo, "Código de banco desconhecido")
