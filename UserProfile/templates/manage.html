@@ -14,25 +14,24 @@
 <div class="container">
     <div class="row">
         {% if messages %}
-            {% for message in messages %}
-                <div class="alert {{ message.tags }}">{{ message }}</div>
-            {% endfor %}
+        {% for message in messages %}
+        <div class="alert {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
         {% endif %}
         <div class="col-md-5">
             <p class="fonte-destaque">Suas contas</p>
             <hr>
-
             <div class="contas">
                 {% for conta in contas %}
                 <div class="lista-contas-main">
                     <span><img width="10%" src="{{conta.icone.url}}">{{ conta.apelido }} ({{ conta.banco_nome }})</span>
 
-                    <span class="total-conta positivo">R$ {{ conta.valor|intcomma }} <a href="{% url 'deletar_banco' conta.token %}"><img
+                    <span class="total-conta positivo">R$ {{ conta.valor|intcomma }} <a
+                            href="{% url 'deletar_banco' conta.token %}"><img
                                 src="{% static 'general/img/exit.png' %}"></a></span>
                 </div>
                 {% endfor %}
             </div>
-
             <hr>
             <span class="fonte-destaque">Total:</span>
             <span class="positivo total-conta font-destaque">R$ {{ total_contas|intcomma }}</span>
@@ -49,13 +48,18 @@
                 <br>
                 <label>Banco</label>
                 <select name="banco" class="form-select">
-                    <option value="NU">Nubank</option>
+                    <option value="">------</option>
+                    {% for banco in bancos %}
+                    <option value="{{ banco.0 }}">{{ banco.1 }}</option>
+                    {% endfor %}
                 </select>
                 <br>
                 <label>Tipo</label>
                 <select name="tipo" class="form-select">
-                    <option value="pf">Pessoa física</option>
-                    <option value="pj">Pessoa jurídica</option>
+                    <option value="">------</option>
+                    {% for i in tipo %}
+                    <option value="{{ i.0 }}">{{ i.1 }}</option>
+                    {% endfor %}
                 </select>
                 <br>
                 <label>Valor</label>
@@ -98,7 +102,8 @@
                 {% for categoria in categorias %}
                 <div class="lista-contas-main">
                     <span>{{categoria}}</span>
-                    <span class="total-conta"><a href="{% url 'update_categoria' categoria.token %}"><img src="{% if categoria.essencial %} {% static 'general/img/check.png' %} {% else %} {% static 'general/img/exit.png' %} {% endif %}"></a></span>
+                    <span class="total-conta"><a href="{% url 'update_categoria' categoria.token %}"><img
+                                src="{% if categoria.essencial %} {% static 'general/img/check.png' %} {% else %} {% static 'general/img/exit.png' %} {% endif %}"></a></span>
                 </div>
                 <br>
                 {% endfor %}

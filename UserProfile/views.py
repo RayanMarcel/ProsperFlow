@@ -1,5 +1,5 @@
 import uuid
-from .choices import ChoicesBancos
+from .choices import ChoicesBancos, ChoicesTipoConta
 from django.contrib import messages
 from .models import Conta, Categoria
 from django.shortcuts import render, redirect
@@ -28,10 +28,15 @@ def manage(request):
     for conta in contas:
         conta.banco_nome = ChoicesBancos.get_banco_nome(conta.banco)
 
+    tipo = ChoicesTipoConta.tipo
+    bancos = ChoicesBancos.bancos
+
     context = {
         'contas': contas,
         'categorias': categorias,
         'total_contas': total_contas,
+        'tipo': tipo,
+        'bancos': bancos,
     }
 
     return render(request, 'manage.html', context)
@@ -65,7 +70,7 @@ def cadastrar_banco(request):
             token=token
         )
         try:
-            conta.full_clean()  # Valida o objeto de acordo com as restrições do modelo
+            #conta.full_clean()  # Valida o objeto de acordo com as restrições do modelo
             conta.save()
             messages.add_message(request, constants.SUCCESS, 'Conta cadastrada com sucesso!')
         except ValidationError as e:
@@ -77,12 +82,12 @@ def cadastrar_banco(request):
 
 
 def deletar_banco(request, token):
-    if request.method == 'POST':
-        conta = Conta.objects.get(token=token)
+    
+    conta = Conta.objects.get(token=token)
+    print(conta)
+    conta.delete()
 
-        conta.delete()
-
-        messages.add_message(request, constants.SUCCESS, 'Conta deletada com sucesso!')
+    messages.add_message(request, constants.SUCCESS, 'Conta deletada com sucesso!')
     return redirect('/UserProfile/manage/')
 
 def cadastrar_categoria(request):

@@ -19,7 +19,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     #Project Apps
-    'UserProfile',
+    'UserProfile',    
+    'planning',
+    'extract',
 ]
 
 MIDDLEWARE = [
