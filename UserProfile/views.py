@@ -5,18 +5,28 @@ from .models import Conta, Categoria
 from django.shortcuts import render, redirect
 from django.contrib.messages import constants
 from django.core.exceptions import ValidationError
+from .utils import calcula_total
 
 def home(request):
-    return render(request, 'home.html')
+    contas = Conta.objects.all()
+
+    total_contas = calcula_total(contas, 'valor')
+
+    context = {
+        'contas': contas,
+        'total_contas': total_contas,
+    }
+
+    return render(request, 'home.html', context)
 
 def manage(request):
     contas = Conta.objects.all()
     categorias = Categoria.objects.all()
-    total_contas = 0
+
+    total_contas = calcula_total(contas, 'valor')
 
     for conta in contas:
         conta.banco_nome = ChoicesBancos.get_banco_nome(conta.banco)
-        total_contas += conta.valor
 
     context = {
         'contas': contas,
