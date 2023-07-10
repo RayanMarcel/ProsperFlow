@@ -6,15 +6,35 @@ from django.shortcuts import render, redirect
 from django.contrib.messages import constants
 from django.core.exceptions import ValidationError
 from .utils import calcula_total
+from extract.models import Valores
+from django.db.models import Sum
+from datetime import datetime
 
 def home(request):
     contas = Conta.objects.all()
 
     total_contas = calcula_total(contas, 'valor')
+    valores = Valores.objects.filter(data__month=datetime.now().month)
+    entradas = valores.filter(tipo='E')
+    saidas = valores.filter(tipo='S')
+    total_entradas = calcula_total(entradas, 'valor')
+    total_saidas = calcula_total(saidas, 'valor')
+    saldo_mensal = total_entradas - total_saidas
+    despesa_mensal = total_saidas
+    total_livre = saldo_mensal
+
+    percentual_gastos_essenciais, percentual_gastos_nao_essenciais = calcula_equilibrio_financeiro()
 
     context = {
         'contas': contas,
         'total_contas': total_contas,
+        'total_entradas': total_entradas,
+        'total_saidas': total_saidas,
+        'saldo_mensal': saldo_mensal,
+        'despesa_mensal': despesa_mensal,
+        'total_livre': total_livre,
+        'percentual_gastos_essenciais':percentual_gastos_essenciais,
+        'percentual_gastos_nao_essenciais':percentual_gastos_nao_essenciais,
     }
 
     return render(request, 'home.html', context)
@@ -122,3 +142,34 @@ def update_categoria(request, token):
     categoria.essencial = not categoria.essencial
     categoria.save()
     return redirect('/UserProfile/manage/')
+
+def dashboard(request):
+    dados = {}
+    categorias = Categoria.objects.all()
+
+    for categoria in categorias:
+        valor = Valores.objects.filter(categoria=categoria).aggregate(Sum('valor'))['valor__sum']
+        dados[categoria.categoria] = float(valor) if valor else None
+
+    context = {
+        'labels': list(dados.keys()),
+        'values': list(dados.values()),
+    }
+
+    return render(request, 'dashboard.html', context)
+
+def calcula_equilibrio_financeiro():
+    gastos_essenciais = Valores.objects.filter(data__month=datetime.now().month).filter(tipo='S').filter(categoria__essencial=True)
+    gastos_nao_essenciais = Valores.objects.filter(data__month=datetime.now().month).filter(tipo='S').filter(categoria__essencial=False)
+
+    total_gastos_essenciais = calcula_total(gastos_essenciais, 'valor')
+    total_gastos_nao_essenciais = calcula_total(gastos_nao_essenciais, 'valor')
+
+    total = total_gastos_essenciais + total_gastos_nao_essenciais
+    try:
+        percentual_gastos_essenciais = total_gastos_essenciais * 100 / total
+        percentual_gastos_nao_essenciais = total_gastos_nao_essenciais * 100 / total
+
+        return percentual_gastos_essenciais, percentual_gastos_nao_essenciais
+    except:
+        return 0, 0
