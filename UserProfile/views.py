@@ -8,10 +8,16 @@ from django.core.exceptions import ValidationError
 from .utils import calcula_total
 from extract.models import Valores
 from django.db.models import Sum
-from datetime import datetime
+from datetime import datetime, timedelta, date
+from django.utils import timezone
+from bill.models import ContaPagar, ContaPaga
 
 def home(request):
     contas = Conta.objects.all()
+    contas_a_pagar = ContaPagar.objects.all()
+
+    MES_ATUAL = datetime.now().month
+    DIA_ATUAL = datetime.now().day
 
     total_contas = calcula_total(contas, 'valor')
     valores = Valores.objects.filter(data__month=datetime.now().month)
@@ -22,8 +28,11 @@ def home(request):
     saldo_mensal = total_entradas - total_saidas
     despesa_mensal = total_saidas
     total_livre = saldo_mensal
-
     percentual_gastos_essenciais, percentual_gastos_nao_essenciais = calcula_equilibrio_financeiro()
+
+    contas_pagas = ContaPaga.objects.filter(data_pagamento__month=MES_ATUAL).values('conta')
+    contas_vencidas = contas_a_pagar.filter(dia_pagamento__lt=DIA_ATUAL).exclude(id__in=contas_pagas)    
+    contas_proximas_vencimento = contas_a_pagar.filter(dia_pagamento__lte = DIA_ATUAL + 5).filter(dia_pagamento__gte=DIA_ATUAL).exclude(id__in=contas_pagas)
 
     context = {
         'contas': contas,
@@ -35,6 +44,8 @@ def home(request):
         'total_livre': total_livre,
         'percentual_gastos_essenciais':percentual_gastos_essenciais,
         'percentual_gastos_nao_essenciais':percentual_gastos_nao_essenciais,
+        'contas_proximas_vencimento': contas_proximas_vencimento,
+        'contas_vencidas': contas_vencidas,
     }
 
     return render(request, 'home.html', context)

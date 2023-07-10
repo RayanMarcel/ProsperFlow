@@ -146,14 +146,14 @@
                     <hr class="hr-borda">
 
                     <span class="fonte-destaque">Próximas do vencimento</span>
-                    <span class="fonte-light">3 contas próximas do vencimento</span>
+                    <span class="fonte-light">{{ contas_proximas_vencimento.count }} contas próximas do vencimento</span>
                     <br>
                     <span class="fonte-destaque negativo">Vencidas</span>
-                    <span class="fonte-light">0 contas vencidas</span>
+                    <span class="fonte-light">{{ contas_vencidas.count }} contas vencidas</span>
 
                     <hr class="hr-borda">
                     
-                    <a href="#" class="botao-principal">Ver mais</a>
+                    <a href="{% url 'check_bill' %}" class="botao-principal">Ver mais</a>
 
                 </div>
             </div>
